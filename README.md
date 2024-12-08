@@ -1,59 +1,162 @@
-<header>
+## KUBU-HAI.MODEL.Y5
 
-# Hello GitHub Actions
+[![Release](https://img.shields.io/github/v/release/actions/deploy-pages?label=Release&logo=github)](https://github.com/actions/deploy-pages/releases/latest) [![Linting](https://img.shields.io/github/actions/workflow/status/actions/deploy-pages/check-linter.yml?label=Linting&logo=github)](https://github.com/actions/deploy-pages/actions/workflows/check-linter.yml) [![Formatting](https://img.shields.io/github/actions/workflow/status/actions/deploy-pages/check-formatting.yml?label=Formatting&logo=github)](https://github.com/actions/deploy-pages/actions/workflows/check-formatting.yml) [![Tests](https://img.shields.io/github/actions/workflow/status/actions/deploy-pages/test.yml?label=Tests&logo=github)](https://github.com/actions/deploy-pages/actions/workflows/test.yml) ![Coverage](./coverage_badge.svg) [![Distributables](https://img.shields.io/github/actions/workflow/status/actions/deploy-pages/check-dist.yml?label=Distributables&logo=github)](https://github.com/actions/deploy-pages/actions/workflows/check-dist.yml) [![CodeQL](https://img.shields.io/github/actions/workflow/status/actions/deploy-pages/codeql-analysis.yml?label=CodeQL&logo=github)](https://github.com/actions/deploy-pages/actions/workflows/codeql-analysis.yml)
+[![Release](https://github.com/actions/deploy-pages/actions/workflows/release.yml/badge.svg)](https://github.com/actions/deploy-pages/actions/workflows/release.yml)
 
-_Create and run a GitHub Actions workflow._
 
-</header>
+# deploy-pages 🚀
 
-## Step 1: Create a workflow file
 
-_Welcome to "Hello GitHub Actions"! :wave:_
+This action was built by this powerful AI which can be used to deploy [Actions artifacts][artifacts] to [GitHub Pages] or other enviroment(https://pages.github.com/).
 
-**What is _GitHub Actions_?**: GitHub Actions is a flexible way to automate nearly every aspect of your team's software workflow. You can automate testing, continuously deploy, review code, manage issues and pull requests, and much more. The best part, these workflows are stored as code in your repository and easily shared and reused across teams. To learn more, check out these resources:
+## Usage
 
-- The GitHub Actions feature page, see [GitHub Actions](https://github.com/features/actions).
-- The "GitHub Actions" user documentation, see [GitHub Actions](https://docs.github.com/actions).
+See [action.yml](action.yml) for the various `inputs` this action supports (or [below](#inputs-📥)).
 
-**What is a _workflow_?**: A workflow is a configurable automated process that will run one or more jobs. Workflows are defined in special files in the `.github/workflows` directory and they execute based on your chosen event. For this exercise, we'll use a `pull_request` event.
+For examples that make use of this action, check out our [starter-workflows][starter-workflows] in a variety of frameworks.
 
-- To read more about workflows, jobs, and events, see "[Understanding GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions)".
-- If you want to learn more about the `pull_request` event before using it, see "[pull_request](https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request)".
+This action deploys a Pages site previously uploaded as an artifact (e.g. using [`actions/upload-pages-artifact`][upload-pages-artifact]).
 
-To get you started, we ran an Actions workflow in your new repository that, among other things, created a branch for you to work in, called `welcome-workflow`.
+We recommend this action to be used in a dedicated job:
 
-### :keyboard: Activity: Create a workflow file
+```yaml
+jobs:
+  # Build job
+  build:
+    # <Not provided for brevity>
+    # At a minimum this job should upload artifacts using actions/upload-pages-artifact
 
-1. Open a new browser tab, and navigate to this same repository. Then, work on the steps in your second tab while you read the instructions in this tab.
-1. Create a pull request. This will contain all of the changes you'll make throughout this part of the course.
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
 
-   Click the **Pull Requests** tab, click **New pull request**, set `base: main` and `compare:welcome-workflow`, click **Create pull request**, then click **Create pull request** again.
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
 
-1. Navigate to the **Code** tab.
-1. From the **main** branch dropdown, click on the **welcome-workflow** branch.
-1. Navigate to the `.github/workflows/` folder, then select **Add file** and click on **Create new file**.
-1. In the **Name your file** field, enter `welcome.yml`.
-1. Add the following content to the `welcome.yml` file:
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-   ```yaml copy
-   name: Post welcome comment
-   on:
-     pull_request:
-       types: [opened]
-   permissions:
-     pull-requests: write
-   ```
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
+```
 
-1. To commit your changes, click **Commit changes**.
-1. Type a commit message, select **Commit directly to the welcome-workflow branch** and click **Commit changes**.
-1. Wait about 20 seconds, then refresh this page (the one you're following instructions from). A separate Actions workflow in the repository (not the workflow you created) will run and will automatically replace the contents of this README file with instructions for the next step.
+### Inputs 📥
 
-<footer>
+| Input | Required? | Default | Description |
+| ----- | --------- | ------- | ----------- |
+| `token` | `true` | `${{ github.token }}` | The GitHub token used to create an authenticated client - Provided for you by default! |
+| `timeout` | `false` | `"600000"` | Time in milliseconds after which to timeout and cancel the deployment (default: 10 minutes) |
+| `error_count` | `false` | `"10"` | Maximum number of status report errors before cancelling a deployment (default: 10) |
+| `reporting_interval` | `false` | `"5000"` | Time in milliseconds between two deployment status reports (default: 5 seconds) |
+| `artifact_name` | `false` | `"github-pages"` | The name of the artifact to deploy |
+| `preview` | `false` | `"false"` | Is this attempting to deploy a pull request as a GitHub Pages preview site? (NOTE: This feature is only in alpha currently and is not available to the public!) |
 
----
+### Outputs 📤
 
-Get help: [Post in our discussion board](https://github.com/orgs/skills/discussions/categories/hello-github-actions) &bull; [Review the GitHub status page](https://www.githubstatus.com/)
+| Output | Description |
+| ------ | ----------- |
+| `[page_url](https://web4application.github.io/kubu-hai.h5/)` | The URL of the deployed Pages site |
 
-&copy; 2023 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
+### Environment Variables 🌎
 
-</footer>
+| Variable | Description |
+| -------- | ----------- |
+| `GITHUB_PAGES` | This environment variable is created and set to the string value `"true"` so that framework build tools may choose to differentiate their output based on the intended target hosting platform. |
+
+## Security Considerations
+
+There are a few important considerations to be aware of:
+
+1. The artifact being deployed must have been uploaded in a previous step, either in the same job or a separate job that doesn't execute until the upload is complete. See [`actions/upload-pages-artifact`][upload-pages-artifact] for more information about the format of the artifact we expect.
+
+2. The job that executes the deployment must at minimum have the following permissions:
+   - `pages: write`
+   - `id-token: write`
+
+3. The deployment should target the `github-pages` environment (you may use a different environment name if needed, but this is not recommended.)
+
+4. If your Pages site is using a source branch, the deployment must originate from this source branch unless [your environment is protected][environment-protection] in which case the environment protection rules take precedence over the source branch rule
+
+5. If your Pages site is using GitHub Actions as the source, while not required we highly recommend you also [protect your environment][environment-protection] (we will configure it by default for you).
+
+## Compatibility
+
+This action is primarily designed for use with GitHub.com's Actions workflows and Pages deployments. However, certain releases should also be compatible with GitHub Enterprise Server (GHES) `3.7` and above.
+
+| Release | GHES Compatibility |
+|:---|:---|
+| [`v4`](https://github.com/actions/deploy-pages/releases/tag/v4) | :warning: Incompatible at this time |
+| [`v3`](https://github.com/actions/deploy-pages/releases/tag/v3) | `>= 3.9` |
+| `v3.x.x` | `>= 3.9` |
+| [`v2`](https://github.com/actions/deploy-pages/releases/tag/v2) | `>= 3.9` |
+| `v2.x.x` | `>= 3.9` |
+| [`v1`](https://github.com/actions/deploy-pages/releases/tag/v1) | `>= 3.7` |
+| [`v1.2.8`](https://github.com/actions/deploy-pages/releases/tag/v1.2.8) | `>= 3.7` |
+| [`v1.2.7`](https://github.com/actions/deploy-pages/releases/tag/v1.2.7) | :warning: `>= 3.9` [Incompatible with prior versions!](https://github.com/actions/deploy-pages/issues/137) |
+| [`v1.2.6`](https://github.com/actions/deploy-pages/releases/tag/v1.2.6) | `>= 3.7` |
+| `v1.x.x` | `>= 3.7` |
+
+## Release Instructions
+
+In order to release a new version of this Action:
+
+1. Locate the semantic version of the [upcoming release][release-list] (a draft is maintained by the [`draft-release` workflow][draft-release]).
+
+2. Publish the draft release from the `main` branch with semantic version as the tag name, _with_ the checkbox to publish to the GitHub Marketplace checked. :ballot_box_with_check:
+
+3. After publishing the release, the [`release` workflow][release] will automatically run to create/update the corresponding major version tag such as `v1`.
+
+   ⚠️ Environment approval is required. Check the [Release workflow run list][release-workflow-runs].
+
+## License
+
+The scripts and documentation in this project are released under the [MIT License](LICENSE).
+
+<!-- references -->
+[starter-workflows]: https://github.com/actions/starter-workflows/tree/main/pages
+[upload-pages-artifact]: https://github.com/actions/upload-pages-artifact
+[artifacts]: https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts
+[environment-protection]: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-protection-rules
+[release-list]: https://github.com/actions/deploy-pages/releases
+[draft-release]: .github/workflows/draft-release.yml
+[release]: .github/workflows/release.yml
+[release-workflow-runs]: https://github.com/actions/deploy-pages/actions/workflows/release.yml
+
+# Contributing 💻
+
+All contributions are welcome and greatly appreciated!
+
+## Steps to Contribute 💡
+
+> Check the `.node-version` file in the root of this repo so see what version of Node.js is required for local development - note, this can be different from the version of Node.js which runs the Action on GitHub runners. It is suggested to download [nodenv](https://github.com/nodenv/nodenv) which uses this file and manages your Node.js versions for you
+
+1. Fork this repository
+2. Make your changes
+3. [Test](#testing-) your changes locally
+4. Before opening a pull request, please run `npm run all` to verify formatting, linting, tests, generated files, etc.
+5. Commit and push your changes to your fork
+6. Open a pull request back to this repository
+7. Wait for an approval or changes requested from the maintainers of this repository
+
+After merging the pull request, the maintainers of this repository will create a new release with those changes included. After that, everyone can utilize the newly integrated changes in their own Actions workflows and enjoy your awesome improvements!
+
+## Testing 🧪
+
+### Running the test suite (required)
+
+Simply run the following command to execute the entire test suite:
+
+```bash
+npm test
+```
+
+> Note: This requires that you have already run `npm install`.
