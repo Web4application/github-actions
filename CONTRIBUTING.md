@@ -14,7 +14,7 @@ All contributions are welcome and greatly appreciated!
 6. Open a pull request back to this repository
 7. Wait for an approval or changes requested from the maintainers of this repository
 
-After merging the pull request, the maintainers of this repository will create a new release with those changes included. After that, everyone can utilize the newly integrated changes in their own Actions workflows and enjoy your awesome improvements!
+After merging the pull request, the maintainers,of this repository will create a new release with those changes included. After that, everyone can utilize the newly integrated changes in their own Actions workflows and enjoy your awesome improvements!
 
 ## Testing 🧪
 
