@@ -1,34 +1,80 @@
-name: 'Deploy GitHub Pages site'
-description: 'A GitHub Action to deploy an artifact as a GitHub Pages site'
-author: 'GitHub'
-runs:
-  using: 'node20'
-  main: 'dist/index.js'
-inputs:
-  token:
-    description: 'GitHub token'
-    default: ${{ github.token }}
-    required: true
-  timeout:
-    description: 'Time in milliseconds after which to timeout and cancel the deployment (default: 10 minutes)'
-    required: false
-    default: '600000'
-  error_count:
-    description: 'Maximum number of status report errors before cancelling a deployment (default: 10)'
-    required: false
-    default: '10'
-  reporting_interval:
-    description: 'Time in milliseconds between two deployment status report (default: 5 seconds)'
-    required: false
-    default: '5000'
-  artifact_name:
-    description: 'Name of the artifact to deploy'
-    required: false
-    default: 'github-pages'
-  preview:
-    description: 'Is this attempting to deploy a pull request as a GitHub Pages preview site? (NOTE: This feature is only in alpha currently and is not available to the public!)'
-    required: false
-    default: 'false'
-outputs:
-  page_url:
-    description: 'URL to deployed GitHub Pages'
+name: Build and deploy Python app to Azure Web App
+
+env:
+  AZURE_WEBAPP_NAME: Web4  
+  PYTHON_VERSION: '3.8'             
+
+on:
+  push:
+    branches: [ "QUBUHUBsoftware" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python version
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          pytest
+
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-app
+          path: |
+            .
+            !venv/
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: python-app
+          path: .
+
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
