@@ -8,8 +8,8 @@ describe('with all environment variables set', () => {
     process.env.GITHUB_REPOSITORY = 'actions/is-awesome'
     process.env.GITHUB_TOKEN = 'gha-token'
     process.env.GITHUB_SHA = '123abc'
-    process.env.GITHUB_ACTOR = 'monalisa'
-    process.env.GITHUB_ACTION = '__monalisa/octocat'
+    process.env.GITHUB_ACTOR = 'web4application'
+    process.env.GITHUB_ACTION = '__web4application/octocat'
     process.env.GITHUB_ACTION_PATH = 'something'
   })
 
