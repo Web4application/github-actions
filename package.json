@@ -14,7 +14,7 @@
     "@vercel/ncc": "^0.38.1",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
-    "eslint-plugin-github": "^4.10.1",
+    "eslint-plugin-github": "^6.0.0",
     "jest": "^30.0.0",
     "make-coverage-badge": "^1.2.0",
     "nock": "^14.0.0",
