@@ -1,4 +1,4 @@
-name: 🚀 Build and Deploy
+name: 🚀 Build & Deploy
 
 on:
   push:
@@ -11,26 +11,31 @@ jobs:
     uses: ./.github/workflows/reusable-ci.yml
     with:
       node-version: '20'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
-    name: 🚀 Deploy to GitHub Pages
+    name: Deploy GitHub Pages
     needs: ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
     permissions:
       contents: write
       pages: write
       id-token: write
-
     steps:
-      - uses: actions/download-artifact@v6
+      - name: Download build artifact
+        uses: actions/download-artifact@v6
         with:
           name: dist
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v6
-        with:
-          path: dist/
+      - name: Setup Pages configuration
+        uses: actions/configure-pages@v5
 
-      - uses: actions/deploy-pages@v6
+      - name: Upload artifact to Pages
+        uses: actions/upload-pages-artifact@v6
+        with:
+          path: dist
+
+      - name: Publish on GitHub Pages
+        uses: actions/deploy-pages@v6
