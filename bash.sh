@@ -17,3 +17,7 @@ git push origin gh-pages
 git add --all
 git commit -m "Initial commit"
 git push -u origin main
+
+cd .github/actions/deploy
+npm init -y
+npm install @actions/core
