@@ -1,0 +1,10 @@
+name: 'Web4App Action'
+description: 'A GitHub Action to build, test, and deploy TypeScript projects with multi-env support.'
+inputs:
+  name:
+    description: 'Name to greet'
+    required: false
+    default: 'World'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
