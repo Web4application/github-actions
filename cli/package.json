@@ -1,11 +1,18 @@
 {
-  "name": "github-pages",
-  "version": "6.0.0",
-  "description": "CLI to scaffold demo github-pages projects",
+  "name": "github-pages-cli",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "CLI to scaffold demo GitHub Pages Vue apps",
   "bin": {
-    "create-demo-vue": "index.ts"
+    "create-demo-vue": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
   },
   "dependencies": {
     "ncp": "^2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
   }
 }
