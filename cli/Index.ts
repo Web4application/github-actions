@@ -1,33 +1,40 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node
 
-const { cpSync, existsSync, mkdirSync, statSync, readdirSync } = require('fs');
-const path = require('path');
+import { Command } from 'commander';
+import fs from 'fs';
+import path from 'path';
 
-function copyRecursiveSync(src, dest) {
-  const entries = readdirSync(src, { withFileTypes: true });
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
+const program = new Command();
 
-    if (entry.name === 'node_modules' || entry.name === '.git') continue;
+program
+  .name('kubu-hai')
+  .description('CLI for the Kubu-Hai project')
+  .version('1.0.0');
 
-    if (entry.isDirectory()) {
-      mkdirSync(destPath, { recursive: true });
-      copyRecursiveSync(srcPath, destPath);
-    } else {
-      cpSync(srcPath, destPath);
+// Example: create new project
+program
+  .command('create <project-name>')
+  .description('Create a new Kubu-Hai app')
+  .action((projectName: string) => {
+    const templateDir = path.join(__dirname, '..', 'template');
+    const targetDir = path.join(process.cwd(), projectName);
+
+    if (fs.existsSync(targetDir)) {
+      console.error(`❌ Directory "${projectName}" already exists.`);
+      process.exit(1);
     }
-  }
-}
 
-const targetDir = process.argv[2] || 'my-demo-app';
-const templateDir = path.join(__dirname, '..'); // assumes the template is one level up
+    fs.mkdirSync(targetDir);
+    fs.cpSync(templateDir, targetDir, { recursive: true });
+    console.log(`🚀 Project created at ${targetDir}`);
+  });
 
-if (!existsSync(targetDir)) {
-  mkdirSync(targetDir);
-  copyRecursiveSync(templateDir, targetDir);
-  console.log(`🚀 Project created in ${targetDir}`);
-} else {
-  console.error(`❌ Directory "${targetDir}" already exists.`);
-  process.exit(1);
-}
+// Example: say hello
+program
+  .command('hello')
+  .description('Prints hello message')
+  .action(() => {
+    console.log('👋 Hello from Kubu-Hai CLI!');
+  });
+
+program.parse(process.argv);
