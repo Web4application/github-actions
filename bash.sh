@@ -28,3 +28,5 @@ npm install @actions/core
 
 npm install commander
 npm install -D ts-node typescript @types/node
+
+git clone https://github.com/Web4application/github-actions.git
