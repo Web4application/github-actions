@@ -21,3 +21,6 @@ git push -u origin main
 cd .github/actions/deploy
 npm init -y
 npm install @actions/core
+
+npm install commander
+npm install -D ts-node typescript @types/node
